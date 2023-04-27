@@ -5,6 +5,7 @@ const customerRoutes = express.Router();
 
 customerRoutes.route('/').post(addCustomer);
 customerRoutes.route('/:id').get(retrieveCustomerById);
-customerRoutes.route('/:userId').get(retrieveCustomerByUserId);
+//customerRoutes.route('/:userId').get(retrieveCustomerByUserId);
+customerRoutes.route('/').get(retrieveCustomerByUserId);
 
 export default customerRoutes;
