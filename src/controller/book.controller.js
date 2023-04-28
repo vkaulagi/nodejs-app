@@ -8,7 +8,8 @@ const bookHttpStatus = {
     CREATED: { code: 201, status: 'CREATED' },
     BAD_REQUEST: { code: 400, status: 'BAD_REQUEST' },
     NOT_FOUND: { code: 404, status: 'NOT_FOUND' },
-    UNPROCESSABLE_CONTENT: { code: 422, status: 'UNPROCESSABLE_CONTENT' }
+    UNPROCESSABLE_CONTENT: { code: 422, status: 'UNPROCESSABLE_CONTENT' },
+    NO_CONTENT: { code: 204, status: 'NO_CONTENT' }
 };
 
 /*
@@ -191,6 +192,43 @@ export const updateBook = (req, res) => {
         res.status(bookHttpStatus.OK.code).send(new Response(bookHttpStatus.OK.code, bookHttpStatus.OK.status, 'Successful book update', updatedBook));
       });
     });
+  };
+
+/*  export const retrieveRelatedBooks = async (req, res) => {
+    const { isbn } = req.params;
+    try {
+      const [rows] = await db.query(RETRIEVE_BOOK, [isbn, isbn]);
+      if (!rows.length) {
+        return res.status(404).json({ message: 'Book not found' });
+      }
+      return res.status(200).json({ data: rows });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  }; */
+
+  export const retrieveRelatedBooks = async (req, res) => {
+    logger.info(`${req.method} ${req.originalUrl}, retrieving related books`);
+    try {
+      const isbn = req.params.ISBN;
+      const response = await axios.get(`http://44.214.218.139/books/${isbn}/related-books`);
+      const relatedBooks = response.data;
+  
+      if (relatedBooks && relatedBooks.length > 0) {
+        const bookTitles = relatedBooks.map((book) => ({
+          ISBN: book.ISBN,
+          title: book.title,
+          Author: book.Author,
+        }));
+        res.status(bookHttpStatus.OK.code).send(bookTitles);
+      } else {
+        res.sendStatus(bookHttpStatus.NO_CONTENT.code);
+      }
+    } catch (error) {
+      logger.error(error.message);
+      res.status(bookHttpStatus.INTERNAL_SERVER_ERROR.code).send(new Response(bookHttpStatus.INTERNAL_SERVER_ERROR.code, bookHttpStatus.INTERNAL_SERVER_ERROR.status, 'Error retrieving related books'));
+    }
   };
 
 export default bookHttpStatus;
