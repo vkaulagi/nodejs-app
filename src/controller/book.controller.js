@@ -305,7 +305,8 @@ export const retrieveRelatedBooks = async (req, res) => {
       throw new Error('Circuit breaker open. Please try again later.');
     }
 
-    const response = await axios.get(`http://44.214.218.139/books/${isbn}/related-books`);
+    const response = await axios.get(`http://44.214.218.139/recommended-titles/isbn/${isbn}`);
+    //const response = await axios.get(`http://localhost:80/recommended-titles/isbn/${isbn}`);
     const relatedBooks = response.data;
 
     // Reset failure count if request succeeds
