@@ -8,7 +8,7 @@ import bookRoutes from './route/book.route.js';
 import logger from './util/logger.js';
 
 dotenv.config();
-const PORT = process.env.SERVER_PORT || 3000;
+const PORT = process.env.SERVER_PORT || 3001;
 const app = express();
 app.use(cors({ origin: '*' }));
 app.use(express.json());

@@ -208,7 +208,7 @@ export const updateBook = (req, res) => {
     }
   }; */
 
-  export const retrieveRelatedBooks = async (req, res) => {
+/*  export const retrieveRelatedBooks = async (req, res) => {
     logger.info(`${req.method} ${req.originalUrl}, retrieving related books`);
     try {
       const isbn = req.params.ISBN;
@@ -228,6 +228,58 @@ export const updateBook = (req, res) => {
     } catch (error) {
       logger.error(error.message);
       res.status(bookHttpStatus.INTERNAL_SERVER_ERROR.code).send(new Response(bookHttpStatus.INTERNAL_SERVER_ERROR.code, bookHttpStatus.INTERNAL_SERVER_ERROR.status, 'Error retrieving related books'));
+    }
+  }; */
+
+  let failureCount = 0;
+  let circuitBreakerOpen = false;
+  
+  const FAILURE_THRESHOLD = 1;
+  const RETRY_TIMEOUT = 60000; // 5 seconds
+  
+  export const retrieveRelatedBooks = async (req, res) => {
+    try {
+      const isbn = req.params.ISBN;
+  
+      // If the circuit breaker is open, throw an error immediately
+      if (circuitBreakerOpen) {
+        throw new Error('Circuit breaker open. Please try again later.');
+      }
+  
+      const response = await axios.get(`http://44.214.218.139/recommended-titles/isbn/${isbn}`);
+      const relatedBooks = response.data;
+  
+      // Reset failure count if request succeeds
+      failureCount = 0;
+  
+      if (relatedBooks.length > 0) {
+        const bookTitles = relatedBooks.map((book) => ({
+          ISBN: book.ISBN,
+          title: book.title,
+          Author: book.Author,
+        }));
+        res.status(bookHttpStatus.OK.code).send(bookTitles);
+      } else {
+        res.sendStatus(bookHttpStatus.NO_CONTENT.code);
+      }
+    } catch (error) {
+      logger.error(error.message);
+  
+      if (error.response && error.response.status === 404) {
+        res.sendStatus(bookHttpStatus.NO_CONTENT.code);
+      } else {
+        failureCount++;
+  
+        if (failureCount >= FAILURE_THRESHOLD) {
+          circuitBreakerOpen = true;
+          setTimeout(() => {
+            circuitBreakerOpen = false;
+            failureCount = 0;
+          }, RETRY_TIMEOUT);
+        }
+  
+        res.status(bookHttpStatus.INTERNAL_SERVER_ERROR.code).send(new Response(bookHttpStatus.INTERNAL_SERVER_ERROR.code, bookHttpStatus.INTERNAL_SERVER_ERROR.status, 'Error retrieving related books'));
+      }
     }
   };
 
