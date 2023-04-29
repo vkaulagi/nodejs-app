@@ -6,9 +6,11 @@ import Response from './domain/response.js';
 import customerHttpStatus from './controller/customer.controller.js';
 import customerRoutes from './route/customer.route.js';
 import logger from './util/logger.js';
+//import kafkaConsumer from './kafkaConsumer.js';
+import consumer from './kafkaConsumer.js';
 
 dotenv.config();
-const PORT = process.env.SERVER_PORT || 3000;
+const PORT = process.env.SERVER_PORT || 3002;
 const app = express();
 app.use(cors({ origin: '*' }));
 app.use(express.json());
@@ -18,3 +20,8 @@ app.use('/customers', customerRoutes);
 app.get('/', (req, res) => res.send(new Response(customerHttpStatus.OK.code, customerHttpStatus.OK.status, 'API, v1.0.0 - All Systems Go')));
 app.all('*', (req, res) => res.status(customerHttpStatus.NOT_FOUND.code).send(new Response(customerHttpStatus.NOT_FOUND.code, customerHttpStatus.NOT_FOUND.status, 'Route does not exist on the server')));
 app.listen(PORT, () => logger.info(`Server running on: ${ip.address()}:${PORT}`));
+
+//kafkaConsumer();
+//consumer();
+//run().catch(console.error);
+consumer.run().catch(console.error);
