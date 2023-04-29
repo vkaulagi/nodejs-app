@@ -21,7 +21,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /status
-            # port: 8002
+            port: 8000
             scheme: HTTP
           initialDelaySeconds: 30
           periodSeconds: 10
