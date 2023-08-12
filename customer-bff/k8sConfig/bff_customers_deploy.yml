@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bff_customers
+  namespace: book-store-ns
+spec:
+  selector:
+    matchLabels:
+      run: bff_customers
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: bff_customers
+    spec:
+      containers:
+      - name: bff_customers_container
+        image: vkaulagi/bff_customers
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3

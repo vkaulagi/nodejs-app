@@ -1,26 +1,60 @@
-services:
-  mysqldb:
-    image: mysql
-    container_name: mysqlcontainer
-    command: --default-authentication-plugin=mysql_native_password
-    restart: unless-stopped
-    volumes:
-      - ./dbinit/init.sql:/docker-entrypoint-initdb.d/0_init.sql
-      - $HOME/database:/var/lib/mysql
-    ports:
-      - 3306:3306
-    expose:
-      - 3306
-    environment:
-      MYSQL_DATABASE: ecommercedb
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: letmein
-      MYSQL_ROOT_PASSWORD: letmein
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysqldb
-    networks:
-      - internalnet
+# services:
+#   mysqldb:
+#     image: mysql
+#     container_name: mysqlcontainer
+#     command: --default-authentication-plugin=mysql_native_password
+#     restart: unless-stopped
+#     volumes:
+#       - ./dbinit/init.sql:/docker-entrypoint-initdb.d/0_init.sql
+#       - $HOME/database:/var/lib/mysql
+#     ports:
+#       - 3306:3306
+#     expose:
+#       - 3306
+#     environment:
+#       MYSQL_DATABASE: ecommercedb
+#       MYSQL_USER: root
+#       MYSQL_PASSWORD: letmein1
+#       MYSQL_ROOT_PASSWORD: letmein1
+#       SERVICE_TAGS: dev
+#       SERVICE_NAME: mysqldb
+#     networks:
+#       - internalnet
 
+# networks:
+#   internalnet:
+#     driver: bridge
+
+
+# version: '3'
+services:
+  book-bff:
+    build:
+      context: ./book-bff
+    ports:
+      - '80:80'
+    networks:
+      - my-network
+  customer-bff:
+    build:
+      context: ./customer-bff
+    ports:
+      - '80:80'
+    networks:
+      - my-network
+  book-backend:
+    build:
+      context: ./book-backend
+    ports:
+      - '3000:3000'
+    networks:
+      - my-network
+  customer-backend:
+    build:
+      context: ./customer-backend
+    ports:
+      - '3000:3000'
+    networks:
+      - my-network
 networks:
-  internalnet:
-    driver: bridge
+  my-network:

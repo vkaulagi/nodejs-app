@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customers
+  namespace: book-store-ns
+spec:
+  selector:
+    matchLabels:
+      run: customers
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: customers
+    spec:
+      containers:
+      - name: customers_container
+        image: vkaulagi/customers
+        ports:
+        - containerPort: 3000
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
